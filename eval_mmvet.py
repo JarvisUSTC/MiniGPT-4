@@ -54,7 +54,7 @@ with torch.no_grad():
         image = vis_processor(image)
         texts = prepare_texts([text_prompt], conv_temp)
         print(texts)
-        answers = model.generate(image.unsqueeze(0), texts, max_new_tokens=400, do_sample=False, repetition_penalty=1.05)
+        answers = model.generate(image.unsqueeze(0), texts, max_new_tokens=250, do_sample=False, repetition_penalty=1.05, stopping_criteria=stopping_criteria)
         answer = answers[0].split('###')[0]  # remove the stop sign '###'
         answer = answer.split('Assistant:')[-1].strip()
         outputs[f'v1_{question_id}'] = answer
