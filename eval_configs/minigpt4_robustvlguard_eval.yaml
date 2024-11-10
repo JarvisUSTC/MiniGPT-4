@@ -5,8 +5,14 @@ model:
   end_sym: "###"
   low_resource: False
   prompt_template: '###Human: {} ###Assistant: '
-  ckpt: '/home/t-jiaweiwang/Project/LLM-Safty/Visual-Adversarial-Examples-Jailbreak-Large-Language-Models/ckpts/pretrained_minigpt4.pth'
-
+  ckpt: '/home/t-jiaweiwang/Project/LLM-Safty/MiniGPT-4/minigpt4/output/minigpt4_stage3_robustvlguard_finetune_backbone/20241107045/checkpoint_3_merged.pth'
+  lora_r: 0
+  lora_r_backbone: 16
+  # lora_alpha: 16
+  # lora_dropout: 0.0
+  freeze_linear: True
+  # freeze_vit: True
+  # lora_target_modules_backbone: ["mlp.fc1", "mlp.fc2"]
 
 datasets:
   cc_sbu_align:
@@ -17,6 +23,7 @@ datasets:
     text_processor:
       train:
         name: "blip_caption"
+        max_words: 160
 
 run:
   task: image_text_pretrain

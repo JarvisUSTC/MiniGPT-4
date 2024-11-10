@@ -542,7 +542,7 @@ class RunnerBase:
                     collate_fn=collate_fn,
                     drop_last=True if is_train else False,
                 )
-                loader = PrefetchLoader(loader)
+                # loader = PrefetchLoader(loader)
 
                 if is_train:
                     loader = IterLoader(loader, use_distributed=self.use_distributed)

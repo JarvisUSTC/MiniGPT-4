@@ -41,6 +41,13 @@ class MiniGPT4(MiniGPTBase):
             end_sym='\n',
             low_resource=False,  # use 8 bit and put vit in cpu
             device_8bit=0,  # the device of 8bit model should be set when loading and cannot be changed anymore.
+            lora_r=0,  # lora_r means lora is not used
+            lora_r_backbone=0,
+            lora_target_modules=["q_proj", "v_proj"],
+            lora_target_modules_backbone=["attn.qkv", "attn.proj"],
+            lora_alpha=16,
+            lora_dropout=0.05,
+            freeze_linear=False,
     ):
         super().__init__(
             vit_model=vit_model,
@@ -54,6 +61,12 @@ class MiniGPT4(MiniGPTBase):
             end_sym=end_sym,
             low_resource=low_resource,
             device_8bit=device_8bit,
+            lora_r=lora_r,
+            lora_r_backbone=lora_r_backbone,
+            lora_target_modules=lora_target_modules,
+            lora_target_modules_backbone=lora_target_modules_backbone,
+            lora_alpha=lora_alpha,
+            lora_dropout=lora_dropout,
         )
 
         self.has_qformer = has_qformer
@@ -73,6 +86,9 @@ class MiniGPT4(MiniGPTBase):
         self.llama_proj = nn.Linear(
             img_f_dim, self.llama_model.config.hidden_size
         )
+        if freeze_linear:
+            for name, param in self.llama_proj.named_parameters():
+                param.requires_grad = False
 
         if prompt_path:
             with open(prompt_path, 'r') as f:
@@ -166,6 +182,16 @@ class MiniGPT4(MiniGPTBase):
         max_txt_len = cfg.get("max_txt_len", 32)
         end_sym = cfg.get("end_sym", '\n')
 
+        # lora
+        lora_r = cfg.get("lora_r", 0)
+        lora_r_backbone = cfg.get("lora_r_backbone", 0)
+        lora_target_modules = cfg.get("lora_target_modules", ["q_proj", "v_proj"])
+        lora_alpha = cfg.get("lora_alpha", 16)
+        lora_dropout = cfg.get("lora_dropout", 0.05)
+        lora_target_modules_backbone = cfg.get("lora_target_modules_backbone", ["attn.qkv", "attn.proj"])
+
+        freeze_linear = cfg.get("freeze_linear", False)
+
         model = cls(
             vit_model=vit_model,
             q_former_model=q_former_model,
@@ -184,6 +210,13 @@ class MiniGPT4(MiniGPTBase):
             end_sym=end_sym,
             low_resource=low_resource,
             device_8bit=device_8bit,
+            lora_r=lora_r,
+            lora_target_modules=lora_target_modules,
+            lora_alpha=lora_alpha,
+            lora_dropout=lora_dropout,
+            lora_r_backbone=lora_r_backbone,
+            lora_target_modules_backbone=lora_target_modules_backbone,
+            freeze_linear=freeze_linear,
         )
 
         ckpt_path = cfg.get("ckpt", "")  # load weights of MiniGPT-4

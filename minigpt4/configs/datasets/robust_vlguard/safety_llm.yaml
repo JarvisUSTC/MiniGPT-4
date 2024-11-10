@@ -1,0 +1,7 @@
+datasets:
+
+  robustvlguard_safety_llm:
+    data_type: images
+    build_info:
+      image_path: dataset/RobustVLGuard/safety_llm
+      ann_path: dataset/RobustVLGuard/safety_llm/safety_image_instructions_1000.jsonl

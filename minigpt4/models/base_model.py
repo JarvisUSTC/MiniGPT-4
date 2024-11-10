@@ -140,7 +140,8 @@ class BaseModel(nn.Module):
 
     @classmethod
     def init_vision_encoder(
-        cls, model_name, img_size, drop_path_rate, use_grad_checkpoint, precision, freeze
+        cls, model_name, img_size, drop_path_rate, use_grad_checkpoint, precision, freeze, lora_r=0,
+                 lora_target_modules=["attn.qkv", "attn.proj"], **lora_kargs
     ):
         logging.info('Loading VIT')
 
@@ -154,7 +155,21 @@ class BaseModel(nn.Module):
 
         ln_vision = LayerNorm(visual_encoder.num_features)
 
-        if freeze:
+        if lora_r > 0:
+            loraconfig = LoraConfig(
+                r=lora_r,
+                bias="none",
+                target_modules=lora_target_modules,
+                **lora_kargs
+            )
+            visual_encoder = get_peft_model(visual_encoder, loraconfig)
+
+            visual_encoder.print_trainable_parameters()
+            for name, param in ln_vision.named_parameters():
+                param.requires_grad = False
+            ln_vision = ln_vision.eval()
+            ln_vision.train = disabled_train
+        elif freeze:
             for name, param in visual_encoder.named_parameters():
                 param.requires_grad = False
             visual_encoder = visual_encoder.eval()
@@ -197,12 +212,13 @@ class BaseModel(nn.Module):
                 **lora_kargs
             )
             llama_model = get_peft_model(llama_model, loraconfig)
-
+            print('LLAMA model after LORA')
             llama_model.print_trainable_parameters()
 
         else:
             for name, param in llama_model.named_parameters():
                 param.requires_grad = False
+            logging.info("freeze llama model")
         logging.info('Loading LLAMA Done')
         return llama_model, llama_tokenizer
 

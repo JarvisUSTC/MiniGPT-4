@@ -35,9 +35,12 @@ class MiniGPTBase(BaseModel):
         lora_target_modules=["q_proj", "v_proj"],
         lora_alpha=16,
         lora_dropout=0.05,
+        lora_r_backbone=0,
+        lora_target_modules_backbone=["attn.qkv", "attn.proj"],
     ):
         super().__init__()
-
+        print("lora", lora_r)
+        print("lora_backbone", lora_r_backbone)
         self.llama_model, self.llama_tokenizer = self.init_llm(
             llama_model_path=llama_model,
             low_resource=low_resource,
@@ -49,7 +52,11 @@ class MiniGPTBase(BaseModel):
         )
 
         self.visual_encoder, self.ln_vision = self.init_vision_encoder(
-            vit_model, img_size, drop_path_rate, use_grad_checkpoint, vit_precision, freeze_vit
+            vit_model, img_size, drop_path_rate, use_grad_checkpoint, vit_precision, freeze_vit,
+            lora_r=lora_r_backbone,
+            lora_target_modules=lora_target_modules_backbone,
+            lora_alpha=lora_alpha,
+            lora_dropout=lora_dropout,
         )
 
         self.max_txt_len = max_txt_len

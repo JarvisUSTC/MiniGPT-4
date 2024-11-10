@@ -1,0 +1,7 @@
+datasets:
+
+  robustvlguard_general:
+    data_type: images
+    build_info:
+      image_path: dataset/RobustVLGuard
+      ann_path: dataset/RobustVLGuard/comprehensive_4k_sft_internvl_anno.jsonl

@@ -1,0 +1,7 @@
+datasets:
+
+  robustvlguard_vlguard:
+    data_type: images
+    build_info:
+      image_path: dataset/RobustVLGuard/VLGuard/train
+      ann_path: dataset/RobustVLGuard/VLGuard/internvl_train_safe_unsafe_1000.jsonl
