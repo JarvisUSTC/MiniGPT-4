@@ -1,0 +1,85 @@
+model:
+  arch: minigpt4
+  model_type: pretrain_vicuna0
+
+  max_txt_len: 1024
+  end_sym: "###"
+  prompt_path: "prompts/alignment.txt"
+  prompt_template: '###Human: {} ###Assistant: '
+  ckpt: '/workspace/Jiawei/Project/Safety/MiniGPT-4/ckpts/pretrained_minigpt4.pth'
+  lora_r: 0
+  lora_r_backbone: 16
+  lora_alpha: 32
+  lora_dropout: 0.0
+  freeze_linear: False
+  freeze_vit: True
+  lora_target_modules_backbone: ["attn.qkv", "attn.proj", "mlp.fc1", "mlp.fc2"]
+
+datasets:
+  robustvlguard_general: 
+    batch_size: 2
+    vis_processor:
+      train:
+        name: "robustvlguard_image_train"
+        image_size: 224
+        apply_gaussian_noise_prob: 0.3
+    text_processor:
+      train:
+        name: "blip_caption"
+        max_words: 160
+
+  robustvlguard_safety_llm:
+    batch_size: 2
+    vis_processor:
+      train:
+        name: "robustvlguard_image_train"
+        image_size: 224
+        apply_gaussian_noise_prob: 0.3
+    text_processor:
+      train:
+        name: "blip_caption"
+        max_words: 160
+
+  robustvlguard_vlguard:
+    batch_size: 2
+    vis_processor:
+      train:
+        name: "robustvlguard_image_train"
+        image_size: 224
+        apply_gaussian_noise_prob: 0.3
+    text_processor:
+      train:
+        name: "blip_caption"
+        max_words: 160
+
+run:
+  task: image_text_pretrain
+  # optimizer
+  lr_sched: "linear_warmup_cosine_lr"
+  init_lr: 3e-5
+  min_lr: 1e-5
+  warmup_lr: 1e-6
+  accum_grad_iters: 8
+
+  weight_decay: 0.05
+  max_epoch: 4
+  iters_per_epoch: 6000
+  num_workers: 4
+  warmup_steps: 100
+
+  seed: 42
+  output_dir: "output/minigpt4_stage3_robustvlguard_finetune_backbone_linear_lora_aug_03"
+
+  amp: True
+  resume_ckpt_path: null
+
+  evaluate: False 
+  train_splits: ["train"]
+
+  device: "cuda"
+  world_size: 1
+  dist_url: "env://"
+  distributed: True
+
+  wandb_log: True
+  job_name: minigpt4_finetune
